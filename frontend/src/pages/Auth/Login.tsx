@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axiosInstance from "../../assets/api/axiosInstance";
 import axios from "axios";
-import { Link, Navigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 interface ILoginForm {
   email: string;
   password: string;
@@ -12,6 +12,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newData = {
@@ -37,6 +38,7 @@ const Login = () => {
       if (response.status == 200) {
         console.log(response.data.message);
         localStorage.setItem("access_token", response.data?.access_token);
+        navigate('/home/list');
       }
     } catch (err) {
         console.log(err);

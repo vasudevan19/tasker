@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axiosInstance from "../../assets/api/axiosInstance";
 import axios from "axios";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import {useNavigate, useSearchParams } from "react-router-dom";
 
 interface IResetPasswordForm {
   password: string;
