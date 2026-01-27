@@ -44,7 +44,6 @@ class AuthController extends Controller
         if (!$token = Auth::attempt($validated)) {
             return response()->json(['status' => 'error', 'message' => 'Invalid Credentials'], 401);
         }
-        info('payload', [Auth::payload()]);
 
         return response()->json([
             'status' => 'success',
@@ -94,5 +93,44 @@ class AuthController extends Controller
         } else {
             return response()->json(['message' => 'Reset not successfull'], 400);
         }
+    }
+    public function refresh()
+    {
+       $newToken = Auth::refresh();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Token Refreshed Successfully',
+            'refresh_token' => $newToken,
+        ]);
+    }
+
+    public function logout()
+    {
+        Auth::logout();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Successfully logged out',
+        ]);
+    }
+
+    public function users()
+    {
+        $users = User::get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $users,
+        ]);
+    }
+
+    public function user()
+    {
+        $authUser = Auth::user();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User profile retrieved',
+            'user' => $authUser,
+        ]);
     }
 }
