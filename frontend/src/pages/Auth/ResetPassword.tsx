@@ -1,22 +1,28 @@
 import { useState } from "react";
-import axiosInstance from "../../assets/api/axiosInstance";
 import axios from "axios";
-import {useNavigate, useSearchParams } from "react-router-dom";
-
-interface IResetPasswordForm {
-  password: string;
-  confirmPassword: string;
-}
+import { useNavigate, useSearchParams } from "react-router-dom";
+import type {
+  IResetPasswordForm,
+  ResetPasswordFormErrors,
+  ResetPasswordResponse,
+} from "../../types/AuthTypes";
+import MakeRequest from "../../types/MakeRequest";
+import { toast } from "react-toastify";
 
 const ResetPassword = () => {
-    const [URLSearchParams] = useSearchParams();
-    const email = URLSearchParams.get('email');
-    const token = URLSearchParams.get('token');
-    const navigate = useNavigate();
+  const [URLSearchParams] = useSearchParams();
+  const email = URLSearchParams.get("email");
+  const token = URLSearchParams.get("token");
+  const navigate = useNavigate();
+
   const [resetForm, setResetForm] = useState<IResetPasswordForm>({
     password: "",
-    confirmPassword: "",
+    password_confirmation: "",
   });
+  const [formError, setFormError] = useState<ResetPasswordFormErrors | null>(
+    null,
+  );
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPassword = {
@@ -26,27 +32,40 @@ const ResetPassword = () => {
     setResetForm(newPassword);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const resetRequestObj = {
+      data: {
+        email: email,
+        token: token,
+        password: resetForm.password,
+        password_confirmation: resetForm.password_confirmation,
+      },
+      url: "/reset-password",
+      method: "post",
+    };
     try {
-      const response = await axiosInstance({
-        method: "post",
-        url: "/reset-password",
-        data: {
-            email: email,
-            token: token,
-            password: resetForm.password,
-            password_confirmation: resetForm.confirmPassword
-        },
-      });
+      const response =
+        await MakeRequest<ResetPasswordResponse>(resetRequestObj);
 
       if (response.status == 200) {
-          console.log(response.data.message);
-          navigate('/login');
+        toast.success(response.data?.message);
+        navigate("/login");
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        console.error(err.response?.data);
+        if (err.response?.status === 422) {
+          const { password, password_confirmation, email, token} =
+            err.response?.data?.errors;
+          setFormError({
+            password: password,
+            password_confirmation: password_confirmation,
+          });
+          if (email || token) {
+            toast.error(err.response?.data?.errors);
+          }
+        }
+        toast.error(err.response?.data?.message);
       } else {
         console.error(err);
       }
@@ -70,6 +89,11 @@ const ResetPassword = () => {
             className="rounded-md outline-0 border-2 border-gray-400 p-1 xl:p-1.5"
             onChange={handleChange}
           />
+           {formError?.password ? (
+            <span className="text-red-500 text-xs">{formError.password}</span>
+          ) : (
+            ""
+          )}
         </div>
         <div className="flex flex-col">
           <label htmlFor="confirmPassword" className="text-sm mb-0.5">
@@ -77,12 +101,17 @@ const ResetPassword = () => {
           </label>
           <input
             type="password"
-            name="confirmPassword"
+            name="password_confirmation"
             id="confirmPassword"
             placeholder="Enter Confirm Password"
             className="rounded-md outline-0 border-2 border-gray-400 p-1 xl:p-1.5"
             onChange={handleChange}
           />
+          {formError?.password_confirmation ? (
+            <span className="text-red-500 text-xs">{formError.password_confirmation}</span>
+          ) : (
+            ""
+          )}
         </div>
         <div className="flex">
           <button className="bg-black text-white rounded-sm px-2 py-1 mt-4 flex-1 xl:p-1.5">

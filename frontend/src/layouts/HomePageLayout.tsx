@@ -42,7 +42,7 @@ const HomePageLayout = () => {
             <img src={homeLogo} alt="tasker-logo" className="rounded-xl" />
           </div>
           <div
-            className="flex items-center"
+            className="flex items-center relative"
             onClick={(e) => e.stopPropagation()}
           >
             <img

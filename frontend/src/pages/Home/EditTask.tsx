@@ -2,38 +2,35 @@ import { Editor, type EditorTextChangeEvent } from "primereact/editor";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../assets/api/axiosInstance";
 import axios from "axios";
-
-type EditTaskProps = {
-  setShowEditModal: (value: boolean) => void;
-  setDataChanged: (value: boolean) => void;
-  editTaskId: number | null;
-};
-
+import type { EditTaskProps, FetchTaskResponse, UpdateTaskResponse } from "../../types/TaskTypes";
+import MakeRequest from "../../types/MakeRequest";
+import { toast } from "react-toastify";
 
 const EditTask = ({
   setShowEditModal,
   setDataChanged,
   editTaskId,
 }: EditTaskProps) => {
-  const [updateTask, setUpdateTask] = useState<string>('');
+  const [updateTask, setUpdateTask] = useState<string>("");
   const TEXT_MAX_LIMIT = 350;
 
   const fetchSingleTask = async () => {
+    const EditTaskReq = {
+      url: `/task/${editTaskId}`,
+      method: "get",
+    };
     try {
-      const response = await axiosInstance({
-        method: "get",
-        url: `/task/${editTaskId}`,
-      });
+      const response = await MakeRequest<FetchTaskResponse>(EditTaskReq);
 
       if (response?.status == 200) {
         const { message, task } = response?.data;
-        console.log(message);
-        console.log(task);
         setUpdateTask(task.task);
+        console.log(message);
+        // toast.success(message);
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        console.error(err.response?.data);
+        toast.error(err.response?.data);
       } else {
         console.error("common error", err);
       }
@@ -45,41 +42,49 @@ const EditTask = ({
   }, [editTaskId]);
 
   const updateTaskFunc = async (text: string) => {
-    try {
-      const response = await axiosInstance({
+    const updateTaskReq = {
         method: "put",
         url: `/task/${editTaskId}`,
         data: {
           task: text,
         },
-      });
+      }
+    try {
+      const response = await MakeRequest<UpdateTaskResponse>(updateTaskReq);
 
       if (response?.status == 200) {
-        console.log(response?.data?.message);
+        const { message } = response.data;
+        toast.success(message);
         setDataChanged(true);
-        setShowEditModal(false)
+        setShowEditModal(false);
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        console.error(err.response?.data);
+       if (err.response?.status === 422) {
+          const {task} =
+            err.response?.data?.errors;
+            toast.error(task);
+          
+        }
       } else {
+        toast.error("An error occured");
         console.error("common error", err);
       }
     }
   };
 
-    const handleTextValue = (e: EditorTextChangeEvent) => {
-      if (e.textValue.length >= TEXT_MAX_LIMIT) {
-        console.log("The value must be below 350 characters");
-        return;
-      } else {
-        setUpdateTask(e.htmlValue || '');
-      }
-    };
+  const handleTextValue = (e: EditorTextChangeEvent) => {
+    if (e.textValue.length >= TEXT_MAX_LIMIT) {
+      console.log("The value must be below 350 characters");
+      return;
+    } else {
+      setUpdateTask(e.htmlValue || "");
+    }
+  };
 
   const handleUpdate = () => {
     updateTaskFunc(updateTask);
-  }
+  };
 
   return (
     <div
@@ -94,7 +99,11 @@ const EditTask = ({
           <p className=" text-xl">Edit Task</p>
         </div>
         <div className=" my-2">
-          <Editor style={{ height: "200px", maxWidth:"700px"  }} value={updateTask || ''} onTextChange={(e) => handleTextValue(e)} />
+          <Editor
+            style={{ height: "200px", maxWidth: "700px" }}
+            value={updateTask || ""}
+            onTextChange={(e) => handleTextValue(e)}
+          />
         </div>
         <div className="flex gap-3 justify-end">
           <button

@@ -1,31 +1,43 @@
 import React, { useState } from "react";
-import axiosInstance from "../../assets/api/axiosInstance";
 import axios from "axios";
+import MakeRequest from "../../types/MakeRequest";
+import type { ForgotPasswordErrors, ForgotPasswordResponse } from "../../types/AuthTypes";
+import { toast } from "react-toastify";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState<string>('');
-
+  const [error, setError] = useState<ForgotPasswordErrors | null>(null);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-     e.preventDefault();
-    try {
-      const response = await axiosInstance({
-        method: "post",
-        url: "/forgot-password",
-        data: {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const forgotPasswordRequest = {
+       data: {
           email: email,
-        },
-      });
+      },
+      url: "/forgot-password",
+      method: "post",
+    }
+
+    try {
+      const response = await MakeRequest<ForgotPasswordResponse>(forgotPasswordRequest);
 
       if (response.status == 200) {
-          console.log(response.data.message);
+        toast.success(response.data.message);
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        console.error(err.response?.data);
+        if (err.response?.status === 422) {
+          const {email} =
+            err.response?.data?.errors;
+          setError({ email: email });
+          // if (email) {
+          //   toast.error(err.response?.data?.errors);
+          // }
+        }
+        toast.error(err.response?.data?.message);
       } else {
         console.error(err);
       }
@@ -50,6 +62,11 @@ const ForgotPassword = () => {
             className="rounded-md outline-0 border-2 border-gray-400 p-1 xl:p-1.5"
             onChange={handleChange}
           />
+           {error?.email ? (
+            <span className="text-red-500 text-xs">{error.email}</span>
+          ) : (
+            ""
+          )}
         </div>
         <div className="flex">
           <button className="bg-black text-white rounded-sm px-2 py-1 mt-4 flex-1 xl:p-1.5">

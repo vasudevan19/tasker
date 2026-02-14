@@ -1,14 +1,10 @@
 import axios from "axios";
 import { Editor, type EditorTextChangeEvent } from "primereact/editor";
-import axiosInstance from "../../assets/api/axiosInstance";
-import type React from "react";
+import type { AddTaskProps, AddTaskResponse } from "../../types/TaskTypes";
+import MakeRequest from "../../types/MakeRequest";
+import { toast } from "react-toastify";
 
-type AddTaskProps = {
-  setShowModal: (value: boolean) => void;
-  text: string;
-  setText: (value: string) => void;
-  setDataChanged: React.Dispatch<React.SetStateAction<boolean>>;
-};
+
 const AddTask = ({
   setShowModal,
   text,
@@ -17,17 +13,19 @@ const AddTask = ({
 }: AddTaskProps) => {
   const TEXT_MAX_LIMIT = 350;
   const handleCreateTask = async () => {
+    const addTaskReq = {
+      data: {
+        task: text,
+      },
+      url: "/tasks",
+      method: "post",
+    };
     try {
-      const response = await axiosInstance({
-        method: "post",
-        url: "/tasks",
-        data: {
-          task: text,
-        },
-      });
+      const response = await MakeRequest<AddTaskResponse>(addTaskReq);
 
       if (response?.status == 201) {
-        console.log(response?.data?.message);
+        // console.log(response?.data?.message);
+        toast.success(response.data.message);
         setDataChanged((prev) => !prev);
         setShowModal(false);
         setText("");
@@ -35,7 +33,14 @@ const AddTask = ({
     } catch (err) {
       if (axios.isAxiosError(err)) {
         console.error(err.response?.data);
+        if (err.response?.status === 422) {
+          const {task} =
+            err.response?.data?.errors;
+            toast.error(task);
+          
+        }
       } else {
+        toast.error("An error occured")
         console.error("common error", err);
       }
     }
