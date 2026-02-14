@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Mews\Purifier\Facades\Purifier;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,10 +13,21 @@ use Symfony\Component\HttpFoundation\Response;
 class TaskController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $tasks = Task::select('id', 'task', 'is_completed', 'created_by', 'created_at')
-            ->orderBy('created_at', 'DESC')->get();
+        $dateRange = $request->date_range ?? [];
+        $query = Task::query();
+        $query->select('id', 'task', 'is_completed', 'created_by', 'created_at');
+
+        if(!empty($dateRange)){
+            if(count($dateRange) > 1){
+                $dateRange = [$dateRange[0], $dateRange[1]];
+            }else{
+                $dateRange = [$dateRange[0], $dateRange[0]];
+            }
+            $query->whereBetween(DB::raw('DATE(created_at)'), $dateRange);
+        }
+        $tasks = $query->orderBy('created_at', 'DESC')->get();
 
         $tasksGrouped = $tasks->groupBy(function ($task) {
             return $task->created_at->format('Y-m-d');
@@ -106,7 +118,6 @@ class TaskController extends Controller
             'is_completed' => $validated['is_completed'],
             'updated_by' => $authUser->id,
         ];
-        info('taskstatus', [$taskPayload]);
         $task = Task::findOrFail($id);
         $task->update($taskPayload);
 

@@ -16,9 +16,10 @@ class AuthController extends Controller
         $validated = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email'    => 'required|max:255|email',
-            'password' => 'required|min:4|max:10|confirmed',
+            'password' => 'required|min:4|max:10',
+            'password_confirmation' => 'required|same:password',
         ], [
-            'password.confirmed' => 'Password mismatch.'
+            'password_confirmation.same' => 'Password mismatch.'
         ])->validate();
 
         $validated['password'] = Hash::make($validated['password']);
@@ -42,7 +43,7 @@ class AuthController extends Controller
         )->validate();
 
         if (!$token = Auth::attempt($validated)) {
-            return response()->json(['status' => 'error', 'message' => 'Invalid Credentials'], 401);
+            return response()->json(['status' => 'error', 'message' => 'Invalid Credentials'], 400);
         }
 
         return response()->json([
@@ -76,7 +77,8 @@ class AuthController extends Controller
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
-            'password' => 'required|min:4|max:10|confirmed',
+            'password' => 'required|min:4|max:10',
+            'password_confirmation' => 'required|same:password',
         ]);
 
         $status = Password::reset($request->only('email', 'password', 'password_confirmation', 'token'),

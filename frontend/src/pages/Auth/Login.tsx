@@ -1,17 +1,18 @@
 import React, { useState } from "react";
-import axiosInstance from "../../assets/api/axiosInstance";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-interface ILoginForm {
-  email: string;
-  password: string;
-}
+import type { ILoginForm } from "../../interfaces/auth/ILoginForm";
+import type { LoginResponse } from "../../types/AuthTypes";
+import MakeRequest from "../../types/MakeRequest";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [credentials, setCredentials] = useState<ILoginForm>({
     email: "",
     password: "",
   });
+  const [error, setError] = useState<ILoginForm | null>(null);
+
   const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,29 +24,36 @@ const Login = () => {
     setCredentials(newData);
   };
 
-  const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLoginSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const response = await axiosInstance({
-        method: "post",
-        url: "/login",
-        data: {
-          email: credentials.email,
-          password: credentials.password,
-        },
-      });
 
+    const request = {
+      data: {
+        email: credentials.email,
+        password: credentials.password,
+      },
+      url: "/login",
+      method: "post",
+    };
+    try {
+      const response = await MakeRequest<LoginResponse>(request);
       if (response.status == 200) {
-        console.log(response.data.message);
-        localStorage.setItem("access_token", response.data?.access_token);
-        navigate('/home/list');
+        const { message, access_token } = response.data;
+        toast.success(message);
+        localStorage.setItem("access_token", access_token);
+        navigate("/home/list");
       }
     } catch (err) {
-        console.log(err);
       if (axios.isAxiosError(err)) {
-        console.error(err.response?.data);
+        if (err.response?.status === 422) {
+          const { email, password } = err.response?.data?.errors;
+          setError({ email: email, password: password });
+        }
+        toast.error(err.response?.data?.message);
+        // console.error(err.response?.data);
       } else {
-        console.error('common error',err);
+        console.error("An error occured", err);
+        toast.error("An error occured");
       }
     }
   };
@@ -68,6 +76,11 @@ const Login = () => {
             className="rounded-md outline-0 border-2 border-gray-400 p-1 xl:p-1.5"
             onChange={handleInputChange}
           />
+          {error?.email ? (
+            <span className="text-red-500 text-xs">{error.email}</span>
+          ) : (
+            ""
+          )}
         </div>
         <div className="flex flex-col">
           <label htmlFor="password" className="text-sm mb-0.5">
@@ -81,6 +94,11 @@ const Login = () => {
             className="rounded-md outline-0 border-2 border-gray-400 p-1 xl:p-1.5"
             onChange={handleInputChange}
           />
+          {error?.password ? (
+            <span className="text-red-500 text-xs">{error.password}</span>
+          ) : (
+            ""
+          )}
         </div>
         <div className="flex justify-end text-sm">
           <Link to="/forgot-password" className="hover:underline text-sky-600">

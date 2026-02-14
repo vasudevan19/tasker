@@ -1,37 +1,37 @@
 import axios from "axios";
-import axiosInstance from "../../assets/api/axiosInstance";
+import type {
+  DeleteTaskResponse,
+  TaskActionModalProps,
+} from "../../types/TaskTypes";
+import MakeRequest from "../../types/MakeRequest";
+import { toast } from "react-toastify";
 
-type TaskActionModalProps = {
-  setShowEditModal: (value: boolean) => void;
-  setDataChanged: (value: boolean) => void;
-  taskId: number;
-  setEditTaskId: (val: number) => void;
-};
 const TaskActionModal = ({
   setShowEditModal,
   setDataChanged,
   taskId,
   setEditTaskId,
 }: TaskActionModalProps) => {
-  const handleEditClick = (e: React.MouseEvent<HTMLLIElement>) => {
+  const handleEditClick = () => {
     setEditTaskId(taskId);
     setShowEditModal(true);
   };
 
   const handleTaskdelete = async () => {
+    const deleteReqObj = {
+      method: "delete",
+      url: `/task/${taskId}`,
+    };
     try {
-      const response = await axiosInstance({
-        method: "delete",
-        url: `/task/${taskId}`,
-      });
-
+      const response = await MakeRequest<DeleteTaskResponse>(deleteReqObj);
       if (response?.status == 200) {
-        console.log(response?.data?.message);
+        const { message } = response.data;
+        toast.success(message);
         setDataChanged(true);
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        console.error(err.response?.data);
+        toast.error(err.response?.data);
       } else {
         console.error("common error", err);
       }

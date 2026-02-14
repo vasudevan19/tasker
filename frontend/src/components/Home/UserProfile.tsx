@@ -1,39 +1,39 @@
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../assets/api/axiosInstance";
 import axios from "axios";
+import type { UserProfileProps } from "../../types/TaskTypes";
+import MakeRequest from "../../types/MakeRequest";
+import type { LogoutResponse } from "../../types/AuthTypes";
+import { toast } from "react-toastify";
 
-type UserProfileProps = {
-  setOpenProfile: (value: boolean) => void;
-  user: string;
-};
 
 const UserProfile = ({ setOpenProfile, user }: UserProfileProps) => {
   const navigate = useNavigate();
-
+  
   const handleLogout = async () => {
+    const logoutReq = {
+      method: "post",
+      url: "/logout",
+    };
     try {
-      const response = await axiosInstance({
-        method: "post",
-        url: "/logout",
-      });
+      const response = await MakeRequest<LogoutResponse>(logoutReq);
 
       if (response.status == 200) {
-        console.log(response.data.message);
+        const { message } = response.data;
+        toast.success(message);
         localStorage.removeItem("access_token");
         setOpenProfile(false);
         navigate("/login");
       }
     } catch (err) {
-      console.log(err);
       if (axios.isAxiosError(err)) {
-        console.error(err.response?.data);
+        toast.error(err.response?.data);
       } else {
         console.error("common error", err);
       }
     }
   };
   return (
-    <div className="absolute bg-white  rounded-xs top-5 right-17 pe-6 ps-2 z-100 py-3 flex flex-col gap-3 max-w-[150px]">
+    <div className="absolute bg-white  rounded-xs top-5 right-10 pe-6 ps-2 z-[9999]  py-3 flex flex-col gap-3 max-w-[150px]">
       <p className="text-md font-semibold text-black">{user}</p>
       <button
         type="button"
