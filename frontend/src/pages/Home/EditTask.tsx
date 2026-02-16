@@ -1,6 +1,5 @@
 import { Editor, type EditorTextChangeEvent } from "primereact/editor";
 import { useEffect, useState } from "react";
-import axiosInstance from "../../assets/api/axiosInstance";
 import axios from "axios";
 import type { EditTaskProps, FetchTaskResponse, UpdateTaskResponse } from "../../types/TaskTypes";
 import MakeRequest from "../../types/MakeRequest";
