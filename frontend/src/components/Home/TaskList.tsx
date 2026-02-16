@@ -44,7 +44,7 @@ const TaskList = ({
       const response = await MakeRequest<TaskListResponse>(fetchTasksObj);
 
       if (response?.status == 200) {
-        const { message, tasks } = response?.data;
+        const {  tasks } = response?.data;
         setTaskList(tasks);
         // toast.success(message);
         if (tasks.length > 0) {
