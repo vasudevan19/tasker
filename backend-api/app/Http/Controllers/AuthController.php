@@ -46,12 +46,22 @@ class AuthController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Invalid Credentials'], 400);
         }
 
-        return response()->json([
+        return response()
+        ->json([
             'status' => 'success',
-            'message' => 'Successfully logged in',
-            'access_token' => $token,
-            'token_type' => 'bearer',
-        ]);
+            'message' => 'Successfully logged in'
+        ])
+        ->cookie(
+            'access_token',
+            $token,
+            60 * 24,
+            '/',
+            null,
+            true,   // secure ⭐
+            true,   // httpOnly ⭐
+            false,
+            'None'  // VERY IMPORTANT for Vercel + Render
+        );
     }
 
     public function forgotPassword(Request $request)
@@ -96,14 +106,28 @@ class AuthController extends Controller
             return response()->json(['message' => 'Reset not successfull'], 400);
         }
     }
-    public function refresh()
+    public function refresh(Request $request)
     {
-       $newToken = Auth::refresh();
+        $token = $request->cookie('access_token');
+        if (!$token) {
+            return response()->json(['message' => 'No token'], 401);
+        }
+        $newToken = Auth::setToken($token)->refresh();
         return response()->json([
             'status' => 'success',
             'message' => 'Token Refreshed Successfully',
-            'refresh_token' => $newToken,
-        ]);
+        ])
+            ->cookie(
+                'access_token',
+                $newToken,
+                60 * 24,
+                '/',
+                null,
+                true,   // secure ⭐
+                true,   // httpOnly ⭐
+                false,
+                'None'  // VERY IMPORTANT for Vercel + Render
+            );
     }
 
     public function logout()
@@ -113,7 +137,7 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully logged out',
-        ]);
+        ])->cookie('access_token', '', -1);
     }
 
     public function users()

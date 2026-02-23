@@ -20,7 +20,7 @@ const UserProfile = ({ setOpenProfile, user }: UserProfileProps) => {
       if (response.status == 200) {
         const { message } = response.data;
         toast.success(message);
-        localStorage.removeItem("access_token");
+        // Clear the cookie
         setOpenProfile(false);
         navigate("/login");
       }
