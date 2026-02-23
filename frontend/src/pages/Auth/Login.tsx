@@ -5,6 +5,7 @@ import type { ILoginForm } from "../../interfaces/auth/ILoginForm";
 import type { LoginResponse } from "../../types/AuthTypes";
 import MakeRequest from "../../types/MakeRequest";
 import { toast } from "react-toastify";
+import axiosInstance from "../../assets/api/axiosInstance";
 
 const Login = () => {
   const [credentials, setCredentials] = useState<ILoginForm>({
@@ -36,11 +37,11 @@ const Login = () => {
       method: "post",
     };
     try {
+      await axiosInstance.get("/csrf-cookie");
       const response = await MakeRequest<LoginResponse>(request);
       if (response.status == 200) {
-        const { message, access_token } = response.data;
+        const { message } = response.data;
         toast.success(message);
-        localStorage.setItem("access_token", access_token);
         navigate("/home/list");
       }
     } catch (err) {
