@@ -57,10 +57,10 @@ class AuthController extends Controller
             60 * 24,
             '/',
             null,
-            true,   // secure ⭐
-            true,   // httpOnly ⭐
+            true,   // secure 
+            true,   // httpOnly
             false,
-            'None'  // VERY IMPORTANT for Vercel + Render
+            'None' 
         );
     }
 
@@ -123,10 +123,10 @@ class AuthController extends Controller
                 60 * 24,
                 '/',
                 null,
-                true,   // secure ⭐
-                true,   // httpOnly ⭐
+                true,   // secure
+                true,   // httpOnly
                 false,
-                'None'  // VERY IMPORTANT for Vercel + Render
+                'None' 
             );
     }
 
