@@ -19,9 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // $middleware->alias([
         //     'jwt.cookie' => JwtFromCookie::class,
         // ]);
-        $middleware->prependToGroup('api', JwtFromCookie::class);
         $middleware->appendToGroup('api', [
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            JwtFromCookie::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             StartSession::class,
             ValidateCsrfToken::class,
