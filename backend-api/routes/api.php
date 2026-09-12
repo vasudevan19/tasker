@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TaskController;
 use App\Http\Middleware\JwtFromCookie;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -18,7 +19,7 @@ Route::get('/csrf-cookie', function () {
 
 Route::group([
 
-    'middleware' => [JwtFromCookie::class, 'auth:api'],
+    'middleware' => ['auth:api'],
 
 ], function () {
     Route::post('/logout', [AuthController::class, 'logout'])->withoutMiddleware(Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
