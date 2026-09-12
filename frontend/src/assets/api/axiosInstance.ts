@@ -20,13 +20,38 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+let refreshPromise: Promise<unknown> | null = null;
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status == 401) {
-      await axiosInstance.post("/refresh");
-      return axiosInstance(error.config);
+    const originalRequest = error.config;
+
+    // Never intercept the refresh call itself, avoids infinite recursion.
+    if (originalRequest?.url === "/refresh") {
+      refreshPromise = null;
+      return Promise.reject(error);
     }
+
+    if (error.response?.status == 401 && !originalRequest?._retry) {
+      originalRequest._retry = true;
+
+      // Share a single in-flight refresh across concurrent 401s to avoid
+      // racing the JWT blacklist with multiple refresh calls for the same token.
+      if (!refreshPromise) {
+        refreshPromise = axiosInstance.post("/refresh").finally(() => {
+          refreshPromise = null;
+        });
+      }
+
+      try {
+        await refreshPromise;
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        return Promise.reject(refreshError);
+      }
+    }
+
     return Promise.reject(error);
   },
 );
