@@ -15,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->trustHosts(at: ['localhost', '127.0.0.1', 'https://tasker-f2ay.onrender.com']); // add vercel hosts here when deployed
+        $middleware->trustHosts(at: ['localhost', '127.0.0.1', 'tasker-f2ay.onrender.com']); // add vercel hosts here when deployed
         // $middleware->alias([
         //     'jwt.cookie' => JwtFromCookie::class,
         // ]);
