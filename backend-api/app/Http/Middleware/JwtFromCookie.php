@@ -20,7 +20,6 @@ class JwtFromCookie
         if ($token) {
             $request->headers->set('Authorization', 'Bearer '.$token);
         }
-        info('jwtfromcookie');
         info('jwtfromcookie', [$request->headers->get('Authorization')]);
         return $next($request);
     }
