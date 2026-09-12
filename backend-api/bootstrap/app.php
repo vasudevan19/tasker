@@ -20,7 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
         //     'jwt.cookie' => JwtFromCookie::class,
         // ]);
         $middleware->prependToGroup('api', JwtFromCookie::class);
-        $middleware->appendToGroup('api', [StartSession::class, ValidateCsrfToken::class]);
+        $middleware->appendToGroup('api', [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ValidateCsrfToken::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
