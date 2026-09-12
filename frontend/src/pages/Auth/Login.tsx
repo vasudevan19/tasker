@@ -6,6 +6,7 @@ import type { LoginResponse } from "../../types/AuthTypes";
 import MakeRequest from "../../types/MakeRequest";
 import { toast } from "react-toastify";
 import axiosInstance from "../../assets/api/axiosInstance";
+import { setCsrfToken } from "../../assets/api/csrfStore";
 
 const Login = () => {
   const [credentials, setCredentials] = useState<ILoginForm>({
@@ -37,7 +38,8 @@ const Login = () => {
       method: "post",
     };
     try {
-      await axiosInstance.get("/csrf-cookie");
+      const { data } = await axiosInstance.get("/csrf-cookie");
+      setCsrfToken(data.csrf_token);
       const response = await MakeRequest<LoginResponse>(request);
       if (response.status == 200) {
         const { message } = response.data;

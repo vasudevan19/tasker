@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 import UserProfile from "../components/Home/UserProfile";
 import axios from "axios";
 import axiosInstance from "../assets/api/axiosInstance";
+import { setCsrfToken } from "../assets/api/csrfStore";
 
 const HomePageLayout = () => {
   const [openProfile, setOpenProfile] = useState<boolean>(false);
-  const [user, setUser] = useState<string>('');
+  const [user, setUser] = useState<string>("");
 
   const fetchProfile = async () => {
     try {
@@ -30,7 +31,19 @@ const HomePageLayout = () => {
       }
     }
   };
+
+  // needed on hard refresh since the in-memory CSRF token is lost on page reload
+  const initCsrfToken = async () => {
+    try {
+      const { data } = await axiosInstance.get("/csrf-cookie");
+      setCsrfToken(data.csrf_token);
+    } catch (err) {
+      console.error("Failed to init csrf token", err);
+    }
+  };
+
   useEffect(() => {
+    initCsrfToken();
     fetchProfile();
   }, []);
 
@@ -51,7 +64,9 @@ const HomePageLayout = () => {
               className="w-12 rounded"
               onClick={() => setOpenProfile(true)}
             />
-            {openProfile && <UserProfile setOpenProfile={setOpenProfile} user={user} />}
+            {openProfile && (
+              <UserProfile setOpenProfile={setOpenProfile} user={user} />
+            )}
           </div>
         </div>
         <div className="pt-16 z-10 ">
