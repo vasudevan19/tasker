@@ -16,12 +16,8 @@ COPY . .
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Laravel optimizations
-RUN php artisan config:cache || true
-RUN php artisan route:cache || true
-
 # Expose Render port
 EXPOSE 10000
 
 # Start Laravel
-CMD php artisan serve --host=0.0.0.0 --port=10000
+CMD php artisan config:cache && php artisan serve --host=0.0.0.0 --port=10000
