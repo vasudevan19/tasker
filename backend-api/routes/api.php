@@ -13,12 +13,12 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->withou
 Route::post('/refresh', [AuthController::class, 'refresh'])->withoutMiddleware(Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
 
 Route::get('/csrf-cookie', function () {
-    return response()->json(['csrf' => true]);
+    return response()->json(['csrf_token' => csrf_token()]);
 });
 
 Route::group([
 
-    'middleware' => [JwtFromCookie::class,'auth:api'],
+    'middleware' => [JwtFromCookie::class, 'auth:api'],
 
 ], function () {
     Route::post('/logout', [AuthController::class, 'logout'])->withoutMiddleware(Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);

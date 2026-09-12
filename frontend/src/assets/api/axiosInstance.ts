@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { getCsrfToken } from "./csrfStore";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -11,16 +11,12 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use((config) => {
-  const token = document.cookie
-    .split("; ")
-    .find((c) => c.startsWith("XSRF-TOKEN="))
-    ?.split("=")[1];
-  console.log(token);
-  
+  const token = getCsrfToken();
+
   if (token) {
-   config.headers["X-XSRF-TOKEN"] = decodeURIComponent(token);
+    config.headers["X-CSRF-TOKEN"] = token;
   }
-  
+
   return config;
 });
 
