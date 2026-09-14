@@ -5,7 +5,6 @@ import type { ILoginForm } from "../../interfaces/auth/ILoginForm";
 import type { LoginResponse } from "../../types/AuthTypes";
 import MakeRequest from "../../types/MakeRequest";
 import { toast } from "react-toastify";
-import axiosInstance from "../../assets/api/axiosInstance";
 
 const Login = () => {
   const [credentials, setCredentials] = useState<ILoginForm>({
