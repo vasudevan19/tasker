@@ -47,7 +47,8 @@ class TaskController extends Controller
     }
 
     public function create(Request $request)
-    {
+    {   
+        info('sessions data', [$request->session()->all()]);
         $authUser = Auth::user();
         $validated = Validator::make($request->only('task'), [
             'task' => 'required|string'
