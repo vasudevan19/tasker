@@ -6,7 +6,6 @@ use Illuminate\Cookie\Middleware\EncryptCookies as Middleware;
 
 class EncryptCookies extends Middleware
 {
-    protected $except = [
-        'XSRF-TOKEN',
-    ];
+    // XSRF-TOKEN must stay encrypted so it round-trips through getTokenFromRequest()'s decrypt() call.
+    protected $except = [];
 }

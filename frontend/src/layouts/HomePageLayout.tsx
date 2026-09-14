@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import UserProfile from "../components/Home/UserProfile";
 import axios from "axios";
 import axiosInstance from "../assets/api/axiosInstance";
-import { setCsrfToken } from "../assets/api/csrfStore";
 
 const HomePageLayout = () => {
   const [openProfile, setOpenProfile] = useState<boolean>(false);
@@ -32,19 +31,10 @@ const HomePageLayout = () => {
     }
   };
 
-  // needed on hard refresh since the in-memory CSRF token is lost on page reload
-  const initCsrfToken = async () => {
-    try {
-      const { data } = await axiosInstance.get("/csrf-cookie");
-      setCsrfToken(data.csrf_token);
-    } catch (err) {
-      console.error("Failed to init csrf token", err);
-    }
-  };
-
   useEffect(() => {
-    initCsrfToken();
-    fetchProfile();
+    (async () => {
+      await fetchProfile();
+    })();
   }, []);
 
   return (
