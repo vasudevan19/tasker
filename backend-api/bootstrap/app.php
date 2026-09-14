@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\JwtFromCookie;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
@@ -21,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //     'jwt.cookie' => JwtFromCookie::class,
         // ]);
         $middleware->appendToGroup('api', [
-            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            EncryptCookies::class,
             JwtFromCookie::class,
             StartSession::class,
             ValidateCsrfToken::class,
@@ -29,7 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->priority([
-            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            EncryptCookies::class,
             JwtFromCookie::class,
             Authenticate::class,
         ]);
