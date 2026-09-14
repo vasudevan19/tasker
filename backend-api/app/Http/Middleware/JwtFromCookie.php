@@ -17,6 +17,8 @@ class JwtFromCookie
     {
         $token = $request->cookie('access_token');
         info('token', [$token]);
+        info('Header X-XSRF-TOKEN:', [$request->header('X-XSRF-TOKEN')]);
+        info('Header X-CSRF-TOKEN:', [$request->header('X-CSRF-TOKEN')]);
         if ($token) {
             $request->headers->set('Authorization', 'Bearer '.$token);
         }
