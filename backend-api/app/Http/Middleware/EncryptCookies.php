@@ -10,8 +10,8 @@ class EncryptCookies extends Middleware
     // XSRF-TOKEN must stay encrypted so it round-trips through getTokenFromRequest()'s decrypt() call.
     protected $except = [];
 
-    public static function decryptCookieStatic($cookie)
+    public static function decryptStatic(Request $request)
     {
-        return (new self(app('encrypter')))->decryptCookie('XSRF-TOKEN', $cookie);
+        return (new self(app('encrypter')))->decrypt($request);
     }
 }
