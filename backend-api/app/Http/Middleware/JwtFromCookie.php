@@ -16,13 +16,28 @@ class JwtFromCookie
     public function handle(Request $request, Closure $next): Response
     {
         $token = $request->cookie('access_token');
-        info('token', [$token]);
+
         info('Header X-XSRF-TOKEN:', [$request->header('X-XSRF-TOKEN')]);
-        info('Header X-CSRF-TOKEN:', [$request->header('X-CSRF-TOKEN')]);
+
         if ($token) {
-            $request->headers->set('Authorization', 'Bearer '.$token);
+            $request->headers->set('Authorization', 'Bearer ' . $token);
         }
-        info('jwtfromcookie', [$request->headers->get('Authorization')]);
-        return $next($request);
+        
+        $response = $next($request);
+
+        // 2. Retrieve all outgoing cookies attached to the response
+        $cookies = $response->headers->getCookies();
+
+        foreach ($cookies as $cookie) {
+            info('Outgoing Cookie:', [
+                'name' => $cookie->getName(),
+                'value' => $cookie->getValue(),
+                'domain' => $cookie->getDomain(),
+                'path' => $cookie->getPath(),
+                'expires' => $cookie->getExpiresTime(),
+            ]);
+        }
+
+        return $response;
     }
 }
