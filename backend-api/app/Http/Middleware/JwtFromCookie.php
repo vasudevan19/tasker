@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Middleware\EncryptCookies;
+
 
 class JwtFromCookie
 {
@@ -17,7 +19,7 @@ class JwtFromCookie
     {
         $token = $request->cookie('access_token');
 
-        info('Header X-XSRF-TOKEN:', [$request->header('X-XSRF-TOKEN')]);
+        info('Header X-XSRF-TOKEN:', [EncryptCookies::decryptStatic($request)]);
 
         if ($token) {
             $request->headers->set('Authorization', 'Bearer ' . $token);
