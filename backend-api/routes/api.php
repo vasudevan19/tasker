@@ -33,6 +33,12 @@ Route::get('/csrf-token', function () {
         );
 });
 
+Route::middleware('auth:api')->get('/me', function (Request $request) {
+    return response()->json([
+        'user' => auth()->user(),
+    ]);
+});
+
 Route::group([
 
     'middleware' => ['auth:api'],
