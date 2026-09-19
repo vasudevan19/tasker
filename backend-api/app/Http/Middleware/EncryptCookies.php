@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 class EncryptCookies extends Middleware
 {
     // XSRF-TOKEN must stay encrypted so it round-trips through getTokenFromRequest()'s decrypt() call.
-    protected $except = [];
+    protected $except = ['tasker_csrf'];
 
     public static function decryptStatic(Request $request)
     {

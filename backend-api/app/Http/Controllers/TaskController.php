@@ -18,7 +18,7 @@ class TaskController extends Controller
         $dateRange = $request->date_range ?? [];
         $query = Task::query();
         $query->select('id', 'task', 'is_completed', 'created_by', 'created_at');
-        info('sessions data', [$request->session()->all()]);
+        
         if(!empty($dateRange)){
             if(count($dateRange) > 1){
                 $dateRange = [$dateRange[0], $dateRange[1]];

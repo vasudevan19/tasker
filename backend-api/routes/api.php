@@ -13,6 +13,26 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->with
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->withoutMiddleware(Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
 Route::post('/refresh', [AuthController::class, 'refresh'])->withoutMiddleware(Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
 
+Route::get('/csrf-token', function () {
+    $token = Str::random(64);
+
+    return response()
+        ->json([
+            'csrf_token' => $token,
+        ])
+        ->cookie(
+            'tasker_csrf',
+            $token,
+            60,       // 60 minutes
+            '/',
+            null,     // domain
+            true,     // secure
+            false,    // httpOnly
+            false,    // raw
+            'None'    // sameSite
+        );
+});
+
 Route::group([
 
     'middleware' => ['auth:api'],
