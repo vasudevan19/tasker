@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getCsrfToken } from "./csrf";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -7,11 +8,28 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
   withCredentials: true,
-  // Reads the XSRF-TOKEN cookie Laravel sets and sends it back as X-XSRF-TOKEN automatically.
-  withXSRFToken: true,
-  xsrfCookieName: "XSRF-TOKEN",
-  xsrfHeaderName: "X-XSRF-TOKEN",
+
 });
+
+
+axiosInstance.interceptors.request.use(
+    async (config) => {
+
+        if (
+            config.method &&
+            ["post", "put", "patch", "delete"].includes(
+                config.method.toLowerCase()
+            )
+        ) {
+            const token = await getCsrfToken();
+
+            config.headers["X-CSRF-TOKEN"] = token;
+        }
+
+        return config;
+    }
+);
+
 
 let refreshPromise: Promise<unknown> | null = null;
 

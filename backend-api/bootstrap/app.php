@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\JwtFromCookie;
+use App\Http\Middleware\VerifyCustomCsrf;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -23,14 +24,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // ]);
         $middleware->appendToGroup('api', [
             EncryptCookies::class,
+            VerifyCustomCsrf::class,
             JwtFromCookie::class,
-            StartSession::class,
-            ValidateCsrfToken::class,
-            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
         ]);
 
         $middleware->priority([
             EncryptCookies::class,
+            VerifyCustomCsrf::class,
             JwtFromCookie::class,
             Authenticate::class,
         ]);
